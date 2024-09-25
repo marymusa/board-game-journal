@@ -1,0 +1,41 @@
+name: Deploy to Google App Engine
+
+# Trigger this workflow on pull request merges into the main branch
+on:
+  pull_request:
+    types: [closed]  # Listen for pull requests that are closed (merged or not)
+    branches:
+      - main         # Only for the main branch
+
+jobs:
+  deploy:
+    if: ${{ github.event.pull_request.merged == true }}  # Check if the pull request was merged
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the latest code
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Step 2: Set up JDK (ensure correct version)
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      # Step 3: Set up Google Cloud SDK (gcloud CLI)
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}  # Your GCP project ID
+          service_account_key: ${{ secrets.GCP_SA_KEY }}  # Your GCP Service Account Key
+          export_default_credentials: true
+
+      # Step 4: Build and package with Maven
+      - name: Build and package with Maven
+        run: ./mvnw clean package -DskipTests
+
+      # Step 5: Deploy to Google App Engine
+      - name: Deploy to Google App Engine
+        run: ./mvnw appengine:deploy
