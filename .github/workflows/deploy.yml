@@ -22,7 +22,17 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      # Step 3: Set up Google Cloud SDK (gcloud CLI)
+      # Step 3: Cache Maven dependencies
+      - name: Cache Maven dependencies
+        uses: actions/cache@v3
+        with:
+          # Cache the .m2 directory where Maven stores downloaded dependencies
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-          
+
+      # Step 4: Set up Google Cloud SDK (gcloud CLI)
       - name: Set up Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v1
         with:
@@ -30,10 +40,10 @@ jobs:
           service_account_key: ${{ secrets.GCP_SA_KEY }}  # Your GCP Service Account Key
           export_default_credentials: true
 
-      # Step 4: Build and package with Maven
+      # Step 5: Build and package with Maven
       - name: Build and package with Maven
         run: ./mvnw clean package -DskipTests
 
-      # Step 5: Deploy to Google App Engine
+      # Step 6: Deploy to Google App Engine
       - name: Deploy to Google App Engine
         run: ./mvnw appengine:deploy
