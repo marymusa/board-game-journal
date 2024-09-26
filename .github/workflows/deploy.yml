@@ -50,4 +50,4 @@ jobs:
 
       # Step 7: Deploy to Google App Engine
       - name: Deploy to Google App Engine
-        run: ./mvnw appengine:deploy
+        run: ./mvnw appengine:deploy -Dappengine.verbosity=debug
