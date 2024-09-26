@@ -1,8 +1,8 @@
 name: Deploy to Google App Engine
 
-# Trigger this workflow on pull request merges into the main branch
+# Trigger this workflow on push events
 on:
-  push:  # Trigger on push events
+  push:
     branches:
       - '**'  # This triggers for commits to any branch
 
@@ -26,24 +26,28 @@ jobs:
       - name: Cache Maven dependencies
         uses: actions/cache@v3
         with:
-          # Cache the .m2 directory where Maven stores downloaded dependencies
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
-            ${{ runner.os }}-maven-          
+            ${{ runner.os }}-maven-
 
-      # Step 4: Set up Google Cloud SDK (gcloud CLI)
+      # Step 4: Authenticate with Google Cloud
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}  # Your GCP Service Account Key (JSON format)
+
+      # Step 5: Set up Google Cloud SDK (gcloud CLI)
       - name: Set up Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v1
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID }}  # Your GCP project ID
-          service_account_key: ${{ secrets.GCP_SA_KEY }}  # Your GCP Service Account Key
           export_default_credentials: true
 
-      # Step 5: Build and package with Maven
+      # Step 6: Build and package with Maven
       - name: Build and package with Maven
         run: ./mvnw clean package -DskipTests
 
-      # Step 6: Deploy to Google App Engine
+      # Step 7: Deploy to Google App Engine
       - name: Deploy to Google App Engine
         run: ./mvnw appengine:deploy
