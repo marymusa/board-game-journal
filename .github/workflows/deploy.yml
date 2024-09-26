@@ -1,7 +1,9 @@
 name: Deploy to Google App Engine
 
 on:
-  workflow_dispatch:  # This allows manual triggering of the workflow.
+  push:  # Trigger on push events
+    branches:
+      - '**'  # This triggers for commits to any branch
 
 jobs:
   deploy:
