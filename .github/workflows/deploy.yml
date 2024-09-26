@@ -34,13 +34,13 @@ jobs:
       - name: Build with Maven
         run: mvn clean package
 
-      - id: 'auth'
-        uses: 'google-github-actions/auth@v2'
+      # Step 5: Set up Google Cloud SDK
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
         with:
-          credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
-
-      - name: 'Set up Cloud SDK'
-        uses: 'google-github-actions/setup-gcloud@v2'
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          export_default_credentials: true
 
       # Step 6: Deploy to Google App Engine
       - name: Deploy to App Engine
